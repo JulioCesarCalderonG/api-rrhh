@@ -1,6 +1,6 @@
 const { request, response } = require("express");
 const bcryptjs = require("bcryptjs");
-const { Usuario } = require("../models");
+const { Usuario, Perfil } = require("../models");
 const { generarUsuarioJWT } = require("../helpers/generar-jwt");
 
 const getUsuarios= async(req=request,res=response)=>{
@@ -10,6 +10,11 @@ const getUsuarios= async(req=request,res=response)=>{
         const usuario = await Usuario.findAll({
             where:{
                 estado:est
+            },
+            include:{
+                model:Perfil,
+                as:'perfil',
+                attributes:['idPerfil','nombre']
             }
         })
         res.json({

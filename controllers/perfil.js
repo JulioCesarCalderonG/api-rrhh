@@ -1,5 +1,5 @@
 const { request, response } = require("express");
-const { Perfil } = require("../models");
+const { Perfil, Menu, SubMenu, PerfilSubMenu } = require("../models");
 const { Op } = require("sequelize");
 
 const getPerfiles = async (req = request, res = response) => {
@@ -23,6 +23,89 @@ const getPerfiles = async (req = request, res = response) => {
     });
   }
 };
+
+const getPerfilMenu=async(req=request,res=response)=>{
+  try {
+    //const usuario = req.usuarioToken;
+    const {id} = req.params;
+    //OBTENEMOS LOS SUBMENU QUE NO DEBERIAN ESTAR
+    const perfSubMenu = await PerfilSubMenu.findAll({
+      where:{
+        idPerfil:id
+      },
+      attributes:['idSubMenu']
+    });
+    let listArray = [];
+    for (let i = 0; i < perfSubMenu.length; i++) {
+      listArray.push(perfSubMenu[i].idSubMenu);
+    }
+    //let listArray = [1,2];
+    const menu = await Menu.findAll({
+      attributes:['idMenu','nomMenu'],
+      include:{
+          model:SubMenu,
+          as:'submenu',
+          attributes:['idSubMenu','subMenu'],
+          where:{
+            idSubMenu:{
+              [Op.notIn]:listArray
+            }
+          }
+      }
+    })
+    res.json({
+      ok: true,
+      msg: "Se muestra los datos con exito",
+      menu
+    });
+  } catch (error) {
+    res.status(400).json({
+      ok:false,
+      msg:`Error: ${error}`
+    })
+  }
+}
+const getPerfilMenuInclude=async(req=request,res=response)=>{
+  try {
+    //const usuario = req.usuarioToken;
+    const {id} = req.params;
+    //OBTENEMOS LOS SUBMENU QUE NO DEBERIAN ESTAR
+    const perfSubMenu = await PerfilSubMenu.findAll({
+      where:{
+        idPerfil:id
+      },
+      attributes:['idSubMenu']
+    });
+    let listArray = [];
+    for (let i = 0; i < perfSubMenu.length; i++) {
+      listArray.push(perfSubMenu[i].idSubMenu);
+    }
+    //let listArray = [1,2];
+    const menu = await Menu.findAll({
+      attributes:['idMenu','nomMenu'],
+      include:{
+          model:SubMenu,
+          as:'submenu',
+          attributes:['idSubMenu','subMenu'],
+          where:{
+            idSubMenu:{
+              [Op.in]:listArray
+            }
+          }
+      }
+    })
+    res.json({
+      ok: true,
+      msg: "Se muestra los datos con exito",
+      menu
+    });
+  } catch (error) {
+    res.status(400).json({
+      ok:false,
+      msg:`Error: ${error}`
+    })
+  }
+}
 
 const getPerfil = async (req = request, res = response) => {
   try {
@@ -155,6 +238,8 @@ const deletePerfil = async (req = request, res = response) => {
 
 module.exports = {
   getPerfiles,
+  getPerfilMenu,
+  getPerfilMenuInclude,
   getPerfil,
   postPerfil,
   putPerfil,

@@ -27,7 +27,13 @@ const RegimenLaboral = require('./regimen-laboral');
 const Historial = require('./historial');
 const Reporte = require('./reporte');
 const Rol = require('./rol');
-
+const Departamento = require('./departamento');
+const Provincia = require('./provincia');
+const Distrito = require('./distrito');
+const Presidente = require('./presidente');
+const AmpliacionContrato = require('./ampliacion-contrato');
+const TipoContrato = require('./tipo-contrato');
+const Contrato = require('./contrato');
 
 
 module.exports = {
@@ -59,5 +65,12 @@ module.exports = {
     RegimenLaboral,
     Historial,
     Reporte,
-    Rol
+    Rol,
+    Departamento,
+    Provincia,
+    Distrito,
+    Presidente,
+    AmpliacionContrato,
+    TipoContrato,
+    Contrato
 }

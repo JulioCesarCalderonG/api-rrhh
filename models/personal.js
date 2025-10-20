@@ -5,6 +5,7 @@ const Licencia = require("./licencia");
 const Merito = require("./merito");
 const RegimenLaboral = require("./regimen-laboral");
 const Reporte = require("./reporte");
+const Distrito = require("./distrito");
 
 
 class Personal extends Model{}
@@ -22,6 +23,15 @@ Personal.init({
     },
     escalafon:{
         type:DataTypes.CHAR
+    },
+    ruc:{
+        type:DataTypes.CHAR
+    },
+    domicilio:{
+        type:DataTypes.STRING
+    },
+    idDistrito:{
+        type:DataTypes.INTEGER
     },
     fecha_inicio:{
         type:DataTypes.CHAR
@@ -88,6 +98,18 @@ Personal.hasMany(Reporte,{
 Reporte.belongsTo(Personal,{
     sourcekey:'id',
     foreignKey:'id_personal'
+});
+
+/* Foreign Personal -  DISTRITO */
+
+Personal.hasMany(Distrito,{
+    as:'distrito',
+    foreignKey:'idDistrito'
+});
+
+Distrito.belongsTo(Personal,{
+    as:'personal',
+    foreignKey:'idDistrito'
 });
 
 module.exports = Personal;

@@ -1,5 +1,5 @@
 const { request, response } = require("express");
-const { SubMenu } = require("../models");
+const { SubMenu, Menu } = require("../models");
 
 
 
@@ -10,6 +10,11 @@ const getSubMenus= async(req=request,res=response)=>{
         const subMenu = await SubMenu.findAll({
             where:{
                 estado:est
+            },
+            include:{
+                model:Menu,
+                as:'menu',
+                attributes:['idMenu','nomMenu']
             }
         })
         res.json({

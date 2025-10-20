@@ -14,7 +14,7 @@ router.post("",[
     validarJWTAdmin,
     check("idPerfil","El perfil es obligatorio").not().isEmpty(),
     check("idSubMenu","El submenu es obligatorio").not().isEmpty(),
-    check(["idPerfil","idSubMenu"]).custom(validarPerfilSubMenu),
+    //check(["idPerfil","idSubMenu"]).custom(validarPerfilSubMenu),
     validarCampos
 ],postPerfilSubMenu);
 router.put("/:id",[
@@ -24,7 +24,7 @@ router.put("/:id",[
     check(["idPerfil","idSubMenu"]).custom(validarExistePerfilSubMenu),
     validarCampos
 ],putPerfilSubMenu);
-router.delete("/:id",[
+router.post("/eliminar/perfil",[
     validarJWTAdmin,
     validarCampos
 ],deletePerfilSubMenu);
