@@ -1,5 +1,5 @@
 const { request, response } = require("express");
-const { Perfil, Menu, SubMenu, PerfilSubMenu } = require("../models");
+const { Perfil, Menu, SubMenu, PerfilSubMenu, Departamento } = require("../models");
 const { Op } = require("sequelize");
 
 const getPerfiles = async (req = request, res = response) => {

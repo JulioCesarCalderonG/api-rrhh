@@ -40,7 +40,11 @@ class Server {
             reporte:'/api/reporte',
             historial:'/api/historial',
             solicitud:'/api/solicitud',
-            rol:'/api/rol'
+            rol:'/api/rol',
+            departamento:'/api/departamento',
+            provincia:'/api/provincia',
+            distrito:'/api/distrito',
+            presidente:'/api/presidente'
             
     };
     //Connect to socket
@@ -113,9 +117,11 @@ class Server {
     this.app.use(this.paths.reporte, require('../routes/reporte'));
     this.app.use(this.paths.historial, require('../routes/historial'));
     this.app.use(this.paths.solicitud, require('../routes/reportes'));
-    this.app.use(this.paths.rol, require('../routes/rol')); 
-    
-
+    this.app.use(this.paths.rol, require('../routes/rol'));
+    this.app.use(this.paths.departamento, require('../routes/departamentos'));
+    this.app.use(this.paths.provincia, require('../routes/provincia'));
+    this.app.use(this.paths.distrito, require('../routes/distrito'));
+    this.app.use(this.paths.presidente, require('../routes/presidentes'));
   }
   listen() {
     this.httpServer.listen(this.port, () => {

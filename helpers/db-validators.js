@@ -5,7 +5,11 @@ const { Perfil, Usuario, Menu, SubMenu, PerfilSubMenu, Area,
     Personal,
     Administrador,
     Sede,
-    DetalleLicencia, } = require("../models");
+    DetalleLicencia,
+    Departamento,
+    Provincia,
+    Distrito,
+    Presidente, } = require("../models");
 
 
 
@@ -380,6 +384,73 @@ const validarNombreDetalleLicencia = async (nombre = '') => {
     }
 }
 
+
+const validarNombreDepartamento = async (nombre = "") => {
+    const validar = await Departamento.findOne({
+        where: {
+            nombre: {
+                [Op.in]:[nombre]
+            }
+        }
+    })
+    if (validar) {
+        throw new Error(`El Departamento: ${nombre} ya esta registrado en la BD`);
+    }
+}
+const validarNombreProvincia = async (valor, { req }) => {
+    const nombre = req.body.nombre?.trim();
+    const idDepartamento= req.body.idDepartamento;
+    const validar = await Provincia.findOne({
+        where: {
+            nombre: {
+                [Op.in]:[nombre]
+            },
+            idDepartamento
+        }
+    })
+    if (validar) {
+        throw new Error(`La provincia: ${nombre} ya esta registrado en la BD`);
+    }
+}
+const validarNombreDistrito = async (valor, { req }) => {
+    const nombre = req.body.nombre?.trim();
+    const idProvincia= req.body.idProvincia;
+    const validar = await Distrito.findOne({
+        where: {
+            nombre: {
+                [Op.in]:[nombre]
+            },
+            idProvincia
+        }
+    })
+    if (validar) {
+        throw new Error(`El distrito: ${nombre} ya esta registrado en la BD`);
+    }
+}
+const validarNombrePresidente = async (nombre="") => {
+    const validar = await Presidente.findOne({
+        where: {
+            nombre: {
+                [Op.in]:[nombre]
+            }
+        }
+    })
+    if (validar) {
+        throw new Error(`El nombre: ${nombre} ya esta registrado en la BD`);
+    }
+}
+const validarDNIPresidente = async (dni="") => {
+    const validar = await Presidente.findOne({
+        where: {
+            dni: {
+                [Op.in]:[dni]
+            }
+        }
+    })
+    if (validar) {
+        throw new Error(`El DNI: ${nombre} ya esta registrado en la BD`);
+    }
+}
 module.exports = {
     validarNombrePerfil,
     validarExisteNombrePerfil,
@@ -411,5 +482,10 @@ module.exports = {
     validarNombreOrgano,
     validarNombreUnidadOrganica,
     validarNombreTipoLicencia,
-    validarNombreDetalleLicencia
+    validarNombreDetalleLicencia,
+    validarNombreDepartamento,
+    validarNombreProvincia,
+    validarNombreDistrito,
+    validarNombrePresidente,
+    validarDNIPresidente
 }
