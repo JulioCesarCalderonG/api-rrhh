@@ -24,15 +24,6 @@ Personal.init({
     escalafon:{
         type:DataTypes.CHAR
     },
-    ruc:{
-        type:DataTypes.CHAR
-    },
-    domicilio:{
-        type:DataTypes.STRING
-    },
-    idDistrito:{
-        type:DataTypes.INTEGER
-    },
     fecha_inicio:{
         type:DataTypes.CHAR
     },
