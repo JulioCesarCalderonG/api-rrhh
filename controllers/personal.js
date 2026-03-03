@@ -4,87 +4,48 @@ const { Op } = require("sequelize");
 
 const mostrarPersonales = async (req = request, res = response) => {
   try {
-    const { estado, buscar } = req.query;
-    if (buscar === "") {
-      const resp = await Personal.findAll({
-        where: {
-          estado,
-        },
-        order:[
-          ['nombre','ASC'],
-          ['apellido','ASC']
-        ]
-      });
-      let array=[];
-      if (resp.length>0) {
-        for (let i = 0; i < resp.length; i++) {
-          const obj={
-            ids:i+1,
-            id:resp[i].id,
-            dni:resp[i].dni,
-            nombre:resp[i].nombre,
-            apellido:resp[i].apellido,
-            escalafon:resp[i].escalafon,
-            fecha_inicio:resp[i].fecha_inicio,
-            estado:resp[i].estado
-          }          
-          array.push(obj)
-        }
-      }
-      return res.json({
-        ok: true,
-        msg: "Se muestran correctamento los datos",
-        resp:array
-      });
-    }
-    const resp = await Personal.findAll({
+    const { estado, buscar = "", page = 1, limit = 10 } = req.query;
+    const pagina = parseInt(page==0?1:page);
+    const limite = parseInt(limit);
+    const offset = (pagina - 1) * limite;
+    const { count, rows } = await Personal.findAndCountAll({
       where: {
         estado,
-        [Op.or]:[
+        [Op.or]: [
           {
-            dni:{
-              [Op.startsWith]:`%${buscar}%`
+            dni: {
+              [Op.like]: `%${buscar}%`
             }
           },
           {
-            nombre:{
-              [Op.startsWith]:`%${buscar}%`
-            }            
-          },
-          {
-            apellido:{
-              [Op.startsWith]:`%${buscar}%`
+            nombre: {
+              [Op.like]: `%${buscar}%`
             }
           },
           {
-            escalafon:{
-              [Op.startsWith]:`%${buscar}%`
+            apellido: {
+              [Op.like]: `%${buscar}%`
+            }
+          },
+          {
+            escalafon: {
+              [Op.like]: `%${buscar}%`
             }
           }
         ]
       },
+      limit: limite,
+      offset: offset,
+      order: [["id", "DESC"]] // opcional pero recomendado
     });
-    let array=[];
-      if (resp.length>0) {
-        for (let i = 0; i < resp.length; i++) {
-          const obj={
-            ids:i+1,
-            id:resp[i].id,
-            dni:resp[i].dni,
-            nombre:resp[i].nombre,
-            apellido:resp[i].apellido,
-            escalafon:resp[i].escalafon,
-            fecha_inicio:resp[i].fecha_inicio,
-            estado:resp[i].estado
-          }          
-          array.push(obj)
-        }
-      }
-      res.json({
-        ok: true,
-        msg: "Se muestran correctamento los datos",
-        resp:array
-      });
+    res.json({
+      ok: true,
+      msg: "Se muestran correctamente los datos",
+      totalRegistros: count,
+      totalPaginas: Math.ceil(count / limite),
+      paginaActual: pagina,
+      resp: rows
+    });
   } catch (error) {
     res.status(400).json({
       ok: false,
@@ -117,7 +78,7 @@ const mostrarIdPersonal = async (req = request, res = response) => {
 
 const agregarPersonal = async (req = request, res = response) => {
   try {
-    const { dni,nombre, apellido, escalafon, fechainicio, ...data } = req.body;
+    const { dni, nombre, apellido, escalafon, fechainicio, ...data } = req.body;
     data.dni = dni;
     data.nombre = nombre.toUpperCase();
     data.apellido = apellido.toUpperCase();
