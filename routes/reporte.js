@@ -10,10 +10,12 @@ const {
   postVacacionalPersona,
   mostrarVacacional,
   postVacacionalGeneral,
+  postRecordLaboralPrueba,
 } = require('../controllers/reporte');
 
 const router = Router();
 
+router.post('/recordlaboral/prueba', postRecordLaboralPrueba);
 router.post('/recordlaboral', postRecordLaboral);
 router.post('/recordlaboral/personal/:id', postRecordLaboralPersona);
 router.post('/licencia/personal/:id', postLicenciaPersona);

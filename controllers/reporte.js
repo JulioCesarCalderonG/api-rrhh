@@ -19,11 +19,91 @@ const {
   Condicion,
   Regimen,
 } = require("../models");
+const PDFDocument = require("pdfkit");
+const fss = require("fs");
+require("pdfkit-table");
 const { Op } = require("sequelize");
 const Licencia = require("../models/licencia");
 const DetalleLicencia = require("../models/detalle-licencia");
 const TipoLicencia = require("../models/tipo-licencia");
 const { funDate } = require("../helpers");
+const { mostrarDatosPersona } = require("../middlewares");
+
+const postRecordLaboralPrueba = async (req = request, res = response) => {
+  try {
+    const doc = new PDFDocument({ margin: 30,layout: "landscape", });
+
+    doc.pipe(fss.createWriteStream("reporte.pdf"));
+
+    // TITULO
+    doc
+      .fontSize(14)
+      .text("CORTE SUPERIOR DE JUSTICIA DE UCAYALI", { align: "center" });
+
+    doc
+      .fontSize(11)
+      .text("Unidad de Administración y Finanzas", { align: "center" });
+
+    doc
+      .moveDown()
+      .fontSize(12)
+      .text("RECORD LABORAL", { align: "center" });
+
+    doc.moveDown();
+
+    // DATOS PERSONA
+    doc.fontSize(9);
+    doc.text("PERSONAL: JEAN CARLOS VILLACORTA GARCIA");
+    doc.text("ESCALAFON: 015768");
+    doc.text("FECHA INICIO: 2025-05-27");
+    doc.moveDown();
+
+    // TABLA
+    const table = {
+      headers: [
+        "N°",
+        "DOCUMENTO QUE AUTORIZA",
+        "DEPENDENCIA",
+        "CARGO",
+        "DESDE",
+        "HASTA"
+      ],
+      rows: [
+        [
+          "1",
+          "MEMORANDO N° 344-2025",
+          "JUZGADO PENAL COLEGIADO TRANSITORIO",
+          "ESPECIALISTA JUDICIAL",
+          "2025-05-27",
+          "ACTUALIDAD"
+        ]
+      ]
+    };
+
+    doc.table(table, {
+      width: 500,
+      
+    });
+
+    // TIEMPO
+    doc.moveDown();
+    doc.text("Años: 0   Meses: 9   Días: 17   Hora: 0   Minutos: 0");
+
+    doc.end();
+    return res.json({
+      ok: true,
+      msg: "Se creo documento",
+      //nombre: filename
+    });
+  } catch (error) {
+    res.status(400).json({
+      ok: false,
+      msg: `Error: ${error}`,
+    });
+  }
+
+}
+
 const postRecordLaboral = async (req = request, res = response) => {
   try {
     const {
@@ -349,30 +429,31 @@ const postRecordLaboralPersona = async (req = request, res = response) => {
 
     const filename = "recordlaboralpersonal" + "_doc" + ".pdf";
     const pathUrl = path.join(__dirname, "../pdf", "reportes", filename);
-    const person = await Personal.findOne({
+   /*  const person = await Personal.findOne({
       where: {
         id,
       },
     });
     // ASIGNAMOS LA DEPENDENCIA ACTUAL
-    const mayor = await General.max('fin', {
+     const mayor = await General.max('fin', {
       where: {
         id_personal: id,
-        periodo:1
+        periodo: 1
       }
     });
     const depen = await General.findOne({
       where: {
         id_personal: id,
         fin: mayor,
-        periodo:1
+        periodo: 1
       },
       include: [
         {
           model: Cargo,
         },
       ],
-    });
+    });  */
+    const {person,mayor,depen} = await mostrarDatosPersona(id);
     //const mayor = await General.max('fin');
     /* const mayor = await General.findOne({
       attributes: [[sequelize.fn('max', sequelize.col('fin'))],"dependencia"],
@@ -416,8 +497,8 @@ const postRecordLaboralPersona = async (req = request, res = response) => {
           cargo: `${resp[i].Cargo.descripcion}`,
           desde: resp[i].inicio,
           hasta: resp[i].fin === "2030-12-30" ? "ACTUALIDAD" : resp[i].fin,
-          horainicial:resp[i].horainicial,
-          horafinal:resp[i].horafinal
+          horainicial: resp[i].horainicial,
+          horafinal: resp[i].horafinal
         };
         const { fecha } = funDate();
         const inicioarr = resp[i].inicio.split("-");
@@ -462,15 +543,15 @@ const postRecordLaboralPersona = async (req = request, res = response) => {
           cargo: `${resp3[i].Cargo.descripcion}`,
           desde: resp3[i].inicio,
           hasta: resp3[i].fin === "2030-12-30" ? "ACTUALIDAD" : resp3[i].fin,
-          horainicial:resp3[i].horainicial,
-          horafinal:resp3[i].horafinal
+          horainicial: resp3[i].horainicial,
+          horafinal: resp3[i].horafinal
         };
-        
-        horascountUno = resp3[i].horatotal+horascountUno;
+
+        horascountUno = resp3[i].horatotal + horascountUno;
         array.push(prod);
       }
     }
-    const horas=24;
+    const horas = 24;
     let diasCountDos = 0;
     do {
       if (horascountUno >= horas) {
@@ -478,30 +559,30 @@ const postRecordLaboralPersona = async (req = request, res = response) => {
         horascountUno = (horascountUno - horas).toFixed(2);
       }
     } while (horascountUno >= 24);
-    diasCountUno=diasCountDos+diasCountUno;
-    const hora= String(horascountUno).split('.');
+    diasCountUno = diasCountDos + diasCountUno;
+    const hora = String(horascountUno).split('.');
     let numero = {}
-    if (hora.length===0) {
-      numero={
-        hora:'0',
-        minutos:'0'
+    if (hora.length === 0) {
+      numero = {
+        hora: '0',
+        minutos: '0'
       }
     }
-    else{
-      if (hora.length===2) {
-        numero={
-          hora:`${hora[0]}`,
-          minutos:`${hora[1]}`
+    else {
+      if (hora.length === 2) {
+        numero = {
+          hora: `${hora[0]}`,
+          minutos: `${hora[1]}`
         }
-      }else{
-        numero={
-          hora:`${hora[0]}`,
-          minutos:`0`
+      } else {
+        numero = {
+          hora: `${hora[0]}`,
+          minutos: `0`
         }
       }
     }
     /* SANDO EL REPORTE 2 */
-    
+
     const resp2 = await General.findAll({
       where: {
         id_personal: id,
@@ -539,8 +620,8 @@ const postRecordLaboralPersona = async (req = request, res = response) => {
           cargo: `${resp2[i].Cargo.descripcion}`,
           desde: resp2[i].inicio,
           hasta: resp2[i].fin === "2030-12-30" ? "ACTUALIDAD" : resp2[i].fin,
-          horainicial:resp2[i].horainicial,
-          horafinal:resp2[i].horafinal
+          horainicial: resp2[i].horainicial,
+          horafinal: resp2[i].horafinal
         };
 
         idcount = idcount + 1;
@@ -566,7 +647,7 @@ const postRecordLaboralPersona = async (req = request, res = response) => {
       }
     } while (diasCountUno > 0);
 
-    
+
     const obj = {
       prodlist: array,
       prodlist2: array2,
@@ -593,7 +674,7 @@ const postRecordLaboralPersona = async (req = request, res = response) => {
       ok: true,
       msg: "Se creo documento",
       resp,
-      nombre:filename
+      nombre: filename
     });
   } catch (error) {
     res.status(400).json({
@@ -1130,6 +1211,7 @@ const mostrarVacacional = async (req = request, res = response) => {
   }
 };
 module.exports = {
+  postRecordLaboralPrueba,
   postRecordLaboral,
   postRecordLaboralPersona,
   postLicenciaPersona,

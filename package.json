@@ -23,6 +23,8 @@
     "nodemailer": "^7.0.6",
     "nodemon": "^3.1.10",
     "pdf-creator-node": "^2.3.5",
+    "pdfkit": "^0.17.2",
+    "pdfkit-table": "^0.1.99",
     "sequelize": "^6.37.7",
     "socket.io": "^4.8.1",
     "uuid": "^11.1.0"
