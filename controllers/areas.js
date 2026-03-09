@@ -4,8 +4,11 @@ const { Area, UnidadOrganica } = require("../models");
 
 const mostrarAreas = async (req = request, res = response) => {
   try {
-    const {estado} = req.query;
-    const resp = await Area.findAll({
+    const { estado, buscar = "", page = 1, limit = 10 } = req.query;
+    const pagina = parseInt(page==0?1:page);
+    const limite = parseInt(limit);
+    const offset = (pagina - 1) * limite;
+    const { count, rows } = await Area.findAndCountAll({
       where:{
         estado
       },
@@ -14,29 +17,20 @@ const mostrarAreas = async (req = request, res = response) => {
           model: UnidadOrganica,
         },
       ],
+      limit:limite,
+      offset:offset,
       order:[
         ['nombre','ASC']
       ]
     });
-    let array=[];
-    if (resp) {
-      for (let i = 0; i < resp.length; i++) {
-        const obj={
-          ids:i+1,
-          id:resp[i].id,
-          nombre:resp[i].nombre,
-          sigla:resp[i].sigla,
-          id_unidad_organica:resp[i].id_unidad_organica,
-          estado:resp[i].estado,
-          UnidadOrganica:resp[i].UnidadOrganica,
-        }
-        array.push(obj);
-      }
-    }
+    
     res.json({
       ok: true,
       msg: "Se muestran las areas con exito",
-      resp:array,
+      totalRegistros: count,
+      totalPaginas: Math.ceil(count / limite),
+      paginaActual: pagina,
+      resp: rows
     })
   } catch (error) {
     res.status(400).json({

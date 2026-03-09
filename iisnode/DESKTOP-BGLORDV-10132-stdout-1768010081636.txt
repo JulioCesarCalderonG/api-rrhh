@@ -1,0 +1,3 @@
+[dotenv@17.2.1] injecting env (9) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+Escuchando el puerto \\.\pipe\fc032bcc-f0fc-4692-bcec-a999f07a0b5a: http://localhost:\\.\pipe\fc032bcc-f0fc-4692-bcec-a999f07a0b5a

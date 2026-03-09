@@ -1,0 +1,7 @@
+[dotenv@17.2.1] injecting env (9) from .env -- tip: 📡 auto-backup env with Radar: https://dotenvx.com/radar
+[dotenv@17.2.1] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+Escuchando el puerto \\.\pipe\f0807cb9-95e1-4bbe-9ca2-e84a55d32edf: http://localhost:\\.\pipe\f0807cb9-95e1-4bbe-9ca2-e84a55d32edf
+Executing (default): SELECT 1+1 AS result
+Connection has been established successfully.
+Executing (default): SELECT `Usuario`.`idUsuario`, `Usuario`.`idPerfil`, `Usuario`.`nombre`, `Usuario`.`apellido`, `Usuario`.`user`, `Usuario`.`password`, `Usuario`.`estado`, `Usuario`.`createdAt`, `Usuario`.`updatedAt`, `perfil`.`idPerfil` AS `perfil.idPerfil`, `perfil`.`nombre` AS `perfil.nombre` FROM `usuario` AS `Usuario` LEFT OUTER JOIN `perfil` AS `perfil` ON `Usuario`.`idPerfil` = `perfil`.`idPerfil` WHERE `Usuario`.`estado` = false;
+Executing (default): SELECT `id`, `usuario`, `password`, `nombre`, `apellido`, `activo`, `id_rol` FROM `administrador` AS `Administrador` WHERE `Administrador`.`activo` = '1';

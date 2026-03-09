@@ -3,8 +3,11 @@ const { Cargo, TipoPersonal } = require("../models");
 
 const mostrarCargos = async (req = request, res = response) => {
   try {
-    const {estado} = req.query;
-    const resp = await Cargo.findAll({
+      const { estado, buscar = "", page = 1, limit = 10 } = req.query;
+    const pagina = parseInt(page==0?1:page);
+    const limite = parseInt(limit);
+    const offset = (pagina - 1) * limite;
+    const { count, rows }= await Cargo.findAndCountAll({
       where:{
         estado
       },
@@ -13,29 +16,20 @@ const mostrarCargos = async (req = request, res = response) => {
           model:TipoPersonal
         },
       ],
+      limit: limite,
+      offset: offset,
       order:[
         ['descripcion','ASC']
       ]
     });
-    let array=[];
-    if (resp) {
-      for (let i = 0; i < resp.length; i++) {
-        const obj={
-          ids:i+1,
-          id:resp[i].id,
-          descripcion:resp[i].descripcion,
-          id_tipo_personal:resp[i].id_tipo_personal,
-          estado:resp[i].estado,
-          TipoPersonal:resp[i].TipoPersonal,
-
-        }
-        array.push(obj);
-      }
-    }
+   
   res.json({
     ok: true,
     msg: "Se muestran los datos correctamente",
-    resp:array,
+    totalRegistros: count,
+      totalPaginas: Math.ceil(count / limite),
+      paginaActual: pagina,
+      resp: rows
   });
   } catch (error) {
     res.status(400).json({

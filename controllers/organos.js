@@ -3,8 +3,11 @@ const { Organo, Sede } = require("../models");
 
 const mostrarOrganos = async (req = request, res = response) => {
   try {
-    const {estado} = req.query;
-    const resp = await Organo.findAll({
+    const { estado, buscar = "", page = 1, limit = 10 } = req.query;
+    const pagina = parseInt(page==0?1:page);
+    const limite = parseInt(limit);
+    const offset = (pagina - 1) * limite;
+    const { count, rows } = await Organo.findAndCountAll({
       where:{
         estado
       },
@@ -13,30 +16,21 @@ const mostrarOrganos = async (req = request, res = response) => {
           model: Sede,
         },
       ],
+      limit: limite,
+      offset: offset,
       order:[
         ['nombre','ASC'],
         ['id_sede','ASC']
       ]
     });
-    let array=[];
-    if (resp) {
-      for (let i = 0; i < resp.length; i++) {
-        const obj={
-          ids:i+1,
-          id:resp[i].id,
-          nombre:resp[i].nombre,
-          sigla:resp[i].sigla,
-          id_sede:resp[i].id_sede,
-          estado:resp[i].estado,
-          Sede:resp[i].Sede
-        }
-        array.push(obj);
-      }
-    }
+    
     res.json({
       ok: true,
       msg: "Se muestran los organos con exito",
-      resp:array,
+      totalRegistros: count,
+      totalPaginas: Math.ceil(count / limite),
+      paginaActual: pagina,
+      resp: rows
     });
   } catch (error) {
     res.status(400).json({

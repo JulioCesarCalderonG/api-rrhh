@@ -30,7 +30,7 @@ PerfilSubMenu.init({
     }
 },{
     sequelize,
-    tableName:'perfilSubMenu',
+    tableName:'perfilsubmenu',
     timestamps:true,
      indexes: [
         {

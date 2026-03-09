@@ -34,7 +34,7 @@ SubMenu.init({
     }
 },{
     sequelize,
-    tableName:"subMenu",
+    tableName:"submenu",
     timestamps:true
 });
 
