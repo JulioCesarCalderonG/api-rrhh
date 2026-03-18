@@ -15,10 +15,14 @@ const { obtenerDependencia } = require('../helpers/obtener-depedencia');
 const { Op, DOUBLE, NUMBER, FLOAT } = require('sequelize');
 const { subirArchivo, funDate } = require('../helpers');
 const mostrarGeneral = async (req = request, res = response) => {
-  const { tipofiltro, dato } = req.query;
-  let array = [];
-  if (tipofiltro === '' && dato === '') {
-    const resp = await General.findAll({
+  const { tipofiltro, dato, page = 1, limit = 10 } = req.query;
+  const pagina = parseInt(page == 0 ? 1 : page);
+  const limite = parseInt(limit);
+  const offset = (pagina - 1) * limite;
+  let array=[];
+
+  if ((tipofiltro == '') || (tipofiltro == "0")) {
+    const { count, rows } = await General.findAndCountAll({
       include: [
         {
           model: Personal,
@@ -27,216 +31,237 @@ const mostrarGeneral = async (req = request, res = response) => {
           model: Cargo,
         },
       ],
+      limit: limite,
+      offset: offset
     });
-    if (resp.length > 0) {
-      for (let i = 0; i < resp.length; i++) {
+    for (let i = 0; i < rows.length; i++) {
         const data = {
-          id: i + 1,
-          codigo_documento: resp[i].codigo_documento,
-          dependencia: resp[i].dependencia,
-          id_personal: resp[i].id_personal,
-          id_cargo: resp[i].id_cargo,
-          inicio: resp[i].inicio,
-          fin: resp[i].fin,
-          documento: resp[i].documento,
-          Personal: resp[i].Personal,
-          Cargo: resp[i].Cargo,
-          horainicial:resp[i].horainicial,
-          horafinal:resp[i].horafinal
+          id: rows[i].id,
+          codigo_documento: rows[i].codigo_documento,
+          dependencia: rows[i].dependencia,
+          id_personal: rows[i].id_personal,
+          id_cargo: rows[i].id_cargo,
+          inicio: rows[i].inicio,
+          fin: (rows[i].fin==='2030-12-30')?'ACTUALIDAD':rows[i].fin,//rows[i].fin,
+          documento: rows[i].documento,
+          Personal: rows[i].Personal,
+          Cargo: rows[i].Cargo,
+          horainicial:rows[i].horainicial,
+          horafinal:rows[i].horafinal
         };
         array.push(data);
       }
-    }
     return res.json({
       ok: true,
       msg: 'Se muestran los datos correctamente',
-      resp: array,
+      totalRegistros: count,
+      totalPaginas: Math.ceil(count / limite),
+      paginaActual: pagina,
+      resp: array
+    });
+  }
+  if (tipofiltro == "1") {
+    const { count, rows } = await General.findAndCountAll({
+      where: {
+        [Op.or]: [
+          {
+            codigo_documento: {
+              [Op.startsWith]: `%${dato}%`,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: Personal,
+        },
+        {
+          model: Cargo,
+        },
+      ],
+      limit: limite,
+      offset: offset
+    });
+for (let i = 0; i < rows.length; i++) {
+        const data = {
+          id: rows[i].id,
+          codigo_documento: rows[i].codigo_documento,
+          dependencia: rows[i].dependencia,
+          id_personal: rows[i].id_personal,
+          id_cargo: rows[i].id_cargo,
+          inicio: rows[i].inicio,
+          fin: (rows[i].fin==='2030-12-30')?'ACTUALIDAD':rows[i].fin,//rows[i].fin,
+          documento: rows[i].documento,
+          Personal: rows[i].Personal,
+          Cargo: rows[i].Cargo,
+          horainicial:rows[i].horainicial,
+          horafinal:rows[i].horafinal
+        };
+        array.push(data);
+      }
+    return res.json({
+      ok: true,
+      msg: 'Se muestran los datos correctamente',
+      totalRegistros: count,
+      totalPaginas: Math.ceil(count / limite),
+      paginaActual: pagina,
+      resp: array
+    });
+  }
+  if (tipofiltro == "2") {
+    const { count, rows } = await General.findAndCountAll({
+      where: {
+        [Op.or]: [
+          {
+            dependencia: {
+              [Op.startsWith]: `%${dato}%`,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: Personal,
+        },
+        {
+          model: Cargo,
+        },
+      ],
+      limit: limite,
+      offset: offset
+    });
+for (let i = 0; i < rows.length; i++) {
+        const data = {
+          id: rows[i].id,
+          codigo_documento: rows[i].codigo_documento,
+          dependencia: rows[i].dependencia,
+          id_personal: rows[i].id_personal,
+          id_cargo: rows[i].id_cargo,
+          inicio: rows[i].inicio,
+          fin: (rows[i].fin==='2030-12-30')?'ACTUALIDAD':rows[i].fin,//rows[i].fin,
+          documento: rows[i].documento,
+          Personal: rows[i].Personal,
+          Cargo: rows[i].Cargo,
+          horainicial:rows[i].horainicial,
+          horafinal:rows[i].horafinal
+        };
+        array.push(data);
+      }
+    return res.json({
+      ok: true,
+      msg: 'Se muestran los datos correctamente',
+      totalRegistros: count,
+      totalPaginas: Math.ceil(count / limite),
+      paginaActual: pagina,
+      resp: array
+    });
+  }
+  if (tipofiltro == "3") {
+    const { count, rows } = await General.findAndCountAll({
+      include: [
+        {
+          model: Personal,
+          where: {
+            [Op.or]: [
+              {
+                nombre: {
+                  [Op.startsWith]: `%${dato}%`,
+                },
+              },
+              {
+                apellido: {
+                  [Op.startsWith]: `%${dato}%`,
+                },
+              },
+            ],
+          },
+        },
+        {
+          model: Cargo,
+        },
+      ],
+      limit: limite,
+      offset: offset
+    });
+    for (let i = 0; i < rows.length; i++) {
+        const data = {
+          id: rows[i].id,
+          codigo_documento: rows[i].codigo_documento,
+          dependencia: rows[i].dependencia,
+          id_personal: rows[i].id_personal,
+          id_cargo: rows[i].id_cargo,
+          inicio: rows[i].inicio,
+          fin: (rows[i].fin==='2030-12-30')?'ACTUALIDAD':rows[i].fin,//rows[i].fin,
+          documento: rows[i].documento,
+          Personal: rows[i].Personal,
+          Cargo: rows[i].Cargo,
+          horainicial:rows[i].horainicial,
+          horafinal:rows[i].horafinal
+        };
+        array.push(data);
+      }
+    return res.json({
+      ok: true,
+      msg: 'Se muestran los datos correctamente',
+      totalRegistros: count,
+      totalPaginas: Math.ceil(count / limite),
+      paginaActual: pagina,
+      resp: array
+    });
+  }
+  if (tipofiltro == "4") {
+    const { count, rows } = await General.findAndCountAll({
+      distinct: true,
+      include: [
+        {
+          model: Personal,
+        },
+        {
+          model: Cargo,
+          where: {
+            descripcion: {
+              [Op.like]: `%${dato}%`,
+            },
+          },
+        },
+      ],
+      limit: limite,
+      offset: offset
+    });
+    for (let i = 0; i < rows.length; i++) {
+        const data = {
+          id: rows[i].id,
+          codigo_documento: rows[i].codigo_documento,
+          dependencia: rows[i].dependencia,
+          id_personal: rows[i].id_personal,
+          id_cargo: rows[i].id_cargo,
+          inicio: rows[i].inicio,
+          fin: (rows[i].fin==='2030-12-30')?'ACTUALIDAD':rows[i].fin,//rows[i].fin,
+          documento: rows[i].documento,
+          Personal: rows[i].Personal,
+          Cargo: rows[i].Cargo,
+          horainicial:rows[i].horainicial,
+          horafinal:rows[i].horafinal
+        };
+        array.push(data);
+      }
+    return res.json({
+      ok: true,
+      msg: 'Se muestran los datos correctamente',
+      totalRegistros: count,
+      totalPaginas: Math.ceil(count / limite),
+      paginaActual: pagina,
+      resp: array
+    });
+  } else {
+    return res.json({
+      ok: true,
+      msg: 'Se muestran los datos correctamente',
+      resp: array
     });
   }
 
-  switch (tipofiltro) {
-    case '1':
-      const resps = await General.findAll({
-        where: {
-          [Op.or]: [
-            {
-              codigo_documento: {
-                [Op.startsWith]: `%${dato}%`,
-              },
-            },
-          ],
-        },
-        include: [
-          {
-            model: Personal,
-          },
-          {
-            model: Cargo,
-          },
-        ],
-      });
-      if (resps.length > 0) {
-        for (let i = 0; i < resps.length; i++) {
-          const data = {
-            id: i + 1,
-            codigo_documento: resps[i].codigo_documento,
-            dependencia: resps[i].dependencia,
-            id_personal: resps[i].id_personal,
-            id_cargo: resps[i].id_cargo,
-            inicio: resps[i].inicio,
-            fin: resps[i].fin,
-            documento: resps[i].documento,
-            Personal: resps[i].Personal,
-            Cargo: resps[i].Cargo,
-          };
-          array.push(data);
-        }
-      }
-      return res.json({
-        ok: true,
-        msg: 'Se muestran los datos correctamente',
-        resp: array,
-      });
-    case '2':
-      const reps = await General.findAll({
-        where: {
-          [Op.or]: [
-            {
-              dependencia: {
-                [Op.startsWith]: `%${dato}%`,
-              },
-            },
-          ],
-        },
-        include: [
-          {
-            model: Personal,
-          },
-          {
-            model: Cargo,
-          },
-        ],
-      });
-      if (reps.length > 0) {
-        for (let i = 0; i < reps.length; i++) {
-          const data = {
-            id: i + 1,
-            codigo_documento: reps[i].codigo_documento,
-            dependencia: reps[i].dependencia,
-            id_personal: reps[i].id_personal,
-            id_cargo: reps[i].id_cargo,
-            inicio: reps[i].inicio,
-            fin: reps[i].fin,
-            documento: reps[i].documento,
-            Personal: reps[i].Personal,
-            Cargo: reps[i].Cargo,
-          };
-          array.push(data);
-        }
-      }
-      return res.json({
-        ok: true,
-        msg: 'Se muestran los datos correctamente',
-        resp: array,
-      });
-    case '3':
-      const resp = await General.findAll({
-        include: [
-          {
-            model: Personal,
-            where: {
-              [Op.or]: [
-                {
-                  nombre: {
-                    [Op.startsWith]: `%${dato}%`,
-                  },
-                },
-                {
-                  apellido: {
-                    [Op.startsWith]: `%${dato}%`,
-                  },
-                },
-              ],
-            },
-          },
-          {
-            model: Cargo,
-          },
-        ],
-      });
 
-      if (resp.length > 0) {
-        for (let i = 0; i < resp.length; i++) {
-          const data = {
-            id: i + 1,
-            codigo_documento: resp[i].codigo_documento,
-            dependencia: resp[i].dependencia,
-            id_personal: resp[i].id_personal,
-            id_cargo: resp[i].id_cargo,
-            inicio: resp[i].inicio,
-            fin: resp[i].fin,
-            documento: resp[i].documento,
-            Personal: resp[i].Personal,
-            Cargo: resp[i].Cargo,
-          };
-          array.push(data);
-        }
-      }
-      return res.json({
-        ok: true,
-        msg: 'Se muestran los datos correctamente',
-        resp: array,
-      });
-    case '4':
-      const resp4 = await General.findAll({
-        include: [
-          {
-            model: Personal,
-          },
-          {
-            model: Cargo,
-            where: {
-              [Op.or]: [
-                {
-                  descripcion: {
-                    [Op.startsWith]: `%${dato}%`,
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      });
-
-      if (resp4.length > 0) {
-        for (let i = 0; i < resp4.length; i++) {
-          const data = {
-            id: i + 1,
-            codigo_documento: resp4[i].codigo_documento,
-            dependencia: resp4[i].dependencia,
-            id_personal: resp4[i].id_personal,
-            id_cargo: resp4[i].id_cargo,
-            inicio: resp4[i].inicio,
-            fin: resp4[i].fin,
-            documento: resp4[i].documento,
-            Personal: resp4[i].Personal,
-            Cargo: resp4[i].Cargo,
-          };
-          array.push(data);
-        }
-      }
-      return res.json({
-        ok: true,
-        msg: 'Se muestran los datos correctamente',
-        resp: array,
-      });
-    default:
-      return res.json({
-        ok: true,
-        msg: 'Se muestran los datos correctamente',
-        resp: null,
-      });
-  }
 };
 const mostrarGeneralPersonal = async (req = request, res = response) => {
   const { id } = req.params;
@@ -270,8 +295,8 @@ const mostrarGeneralPersonal = async (req = request, res = response) => {
         documento: resp[i].documento,
         Personal: resp[i].Personal,
         Cargo: resp[i].Cargo,
-        horainicial:resp[i].horainicial,
-        horafinal:resp[i].horafinal
+        horainicial: resp[i].horainicial,
+        horafinal: resp[i].horafinal
       };
       array.push(data);
     }
@@ -329,8 +354,8 @@ const mostrarGeneralPersonalDni = async (
         documento: resp[i].documento,
         Personal: resp[i].Personal,
         Cargo: resp[i].Cargo,
-        horainicial:resp[i].horainicial,
-        horafinal:resp[i].horafinal
+        horainicial: resp[i].horainicial,
+        horafinal: resp[i].horafinal
       };
       array.push(data);
     }
@@ -619,17 +644,17 @@ const modificarGeneral = async (req = request, res = response) => {
             ok: false,
             msg: 'falta completar las horas finales'
           })
-        }else if (horainicial === '' & horafinal !== '') {
+        } else if (horainicial === '' & horafinal !== '') {
           return res.status(400).json({
             ok: false,
             msg: 'falta completar las horas iniciales'
           })
-        }else if (horainicial > horafinal) {
+        } else if (horainicial > horafinal) {
           return res.status(400).json({
             ok: false,
             msg: 'la hora inicial debe ser mayor a la hora de termino'
           })
-        }else{
+        } else {
           secundario.tipo = 1;
           secundario.horainicial = horainicial;
           secundario.horafinal = horafinal;
@@ -646,7 +671,7 @@ const modificarGeneral = async (req = request, res = response) => {
         secundario.horafinal = null;
         secundario.horatotal = 0;
       }
-    }else{
+    } else {
       secundario.tipo = 0;
       secundario.horainicial = null;
       secundario.horafinal = null;
@@ -677,10 +702,10 @@ const modificarGeneral = async (req = request, res = response) => {
         tipo_documento,
         tipo_dependencia,
         id_dependencia: dependencia,
-        numero:'',
-        ano:'',
-        id_area:null,
-        tipo_sigla:null,
+        numero: '',
+        ano: '',
+        id_area: null,
+        tipo_sigla: null,
         ...secundario
       };
       const general = await General.update(datos, {
@@ -723,8 +748,8 @@ const modificarGeneral = async (req = request, res = response) => {
         tipo_dependencia,
         numero,
         ano,
-        id_area:null,
-        tipo_sigla:null,
+        id_area: null,
+        tipo_sigla: null,
         id_dependencia: dependencia,
         ...secundario
       };
